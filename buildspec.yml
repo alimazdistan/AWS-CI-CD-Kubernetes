@@ -1,0 +1,40 @@
+version: 0.2
+env:
+  variables:
+    AWS_DEFAULT_REGION: "us-east-1"
+    AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID"
+    AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+    commands:
+      - echo "Installing dependencies"
+      - apt install dos2unix curl tar -y
+      - chmod +x install.sh
+      - dos2unix ./install.sh
+      - npm install
+
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR"
+      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin number.dkr.ecr.us-east-1.amazonaws.com
+
+  build:
+    commands:
+      - echo "Building Docker image"
+      - docker build -t number.dkr.ecr.us-east-1.amazonaws.com/ecr:latest .
+
+  post_build:
+    commands:
+      - echo "Pushing Docker image to Amazon ECR"
+      - docker push number.dkr.ecr.us-east-1.amazonaws.com/ecr:latest
+      - echo "Deploying to EKS"
+      - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - aws eks update-kubeconfig --region us-east-1 --name my-cluster28
+      - kubectl apply -f deployment.yaml
+      - kubectl apply -f service.yaml
+      - kubectl get svc
