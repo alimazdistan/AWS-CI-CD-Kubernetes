@@ -1,9 +1,4 @@
 version: 0.2
-env:
-  variables:
-    AWS_DEFAULT_REGION: "us-east-1"
-    AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID"
-    AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY"
 
 phases:
   install:
@@ -11,7 +6,7 @@ phases:
       nodejs: 18
     commands:
       - echo "Installing dependencies"
-      - apt install dos2unix curl tar -y
+      - apt install dos2unix  -y
       - chmod +x install.sh
       - dos2unix ./install.sh
       - npm install vite
@@ -32,9 +27,7 @@ phases:
       - echo "Pushing Docker image to Amazon ECR"
       - docker push "$NUMBER.dkr.ecr.us-east-1.amazonaws.com/ecr:latest"
       - echo "Deploying to EKS"
-      - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-      - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-      - aws eks update-kubeconfig --region us-east-1 --name my-cluster28
+      - aws eks update-kubeconfig --region us-east-1 --name my-cluster
       - kubectl apply -f deployment.yaml
       - kubectl apply -f service.yaml
       - kubectl get svc
