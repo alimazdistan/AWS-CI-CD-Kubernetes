@@ -4,7 +4,7 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      - aws sts get-caller-identity
+      
       - echo "Installing dependencies"
       - apt install dos2unix curl tar -y
       - chmod +x install.sh
