@@ -1,12 +1,12 @@
 version: 0.2
-
 phases:
   install:
     runtime-versions:
       nodejs: 18
     commands:
+      - aws sts get-caller-identity
       - echo "Installing dependencies"
-      - apt install dos2unix  -y
+      - apt install dos2unix curl tar -y
       - chmod +x install.sh
       - dos2unix ./install.sh
       - npm install vite
@@ -21,13 +21,15 @@ phases:
   build:
     commands:
       - echo "Building Docker image"
-      - docker build -t  "$NUMBER.dkr.ecr.us-east-1.amazonaws.com/ecr:latest" .
+      - docker build -t "$NUMBER.dkr.ecr.us-east-1.amazonaws.com/ecr:latest" .
+
   post_build:
     commands:
       - echo "Pushing Docker image to Amazon ECR"
       - docker push "$NUMBER.dkr.ecr.us-east-1.amazonaws.com/ecr:latest"
       - echo "Deploying to EKS"
-      - aws eks update-kubeconfig --region us-east-1 --name my-cluster
+     
+      - aws eks update-kubeconfig --region us-east-1 --name my-cluster30
       - kubectl apply -f deployment.yaml
       - kubectl apply -f service.yaml
       - kubectl get svc
