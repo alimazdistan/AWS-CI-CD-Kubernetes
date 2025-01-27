@@ -8,13 +8,14 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: 18
     commands:
       - echo "Installing dependencies"
       - apt install dos2unix curl tar -y
       - chmod +x install.sh
       - dos2unix ./install.sh
-      - npm install
+      - npm install vite
+      - npm run build
 
   pre_build:
     commands:
